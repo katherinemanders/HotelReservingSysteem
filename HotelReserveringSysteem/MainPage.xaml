@@ -8,6 +8,11 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <Button x:Name="buttonBookRoom" Content="Button" HorizontalAlignment="Left" Margin="148,119,0,0" VerticalAlignment="Top" Height="95" Width="269" Click="buttonBookRoom_Click"/>
+        <TextBlock x:Name="textKamerBezetting" HorizontalAlignment="Left" Margin="70,291,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="32" Width="96"/>
+        <TextBox x:Name="textBoxDayNumber" HorizontalAlignment="Left" Margin="171,291,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" PlaceholderText="1" TextChanged="textBoxDayNumber_TextChanged"/>
+        <ListBox x:Name="listViewBezetting" HorizontalAlignment="Left" Height="390" Margin="266,291,0,0" VerticalAlignment="Top" Width="456" SelectionChanged="listViewBezetting_SelectionChanged"/>
+        <TextBox x:Name="textBoxReserveringInfo" HorizontalAlignment="Left" Margin="761,291,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Height="135" Width="289"/>
 
     </Grid>
 </Page>
