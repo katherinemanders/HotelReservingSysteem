@@ -14,7 +14,7 @@ namespace HotelReserveringSysteem
         private int personenPerKamer;
         private string[] bezettingDitJaar;
         private string[] aantalPersonenDitJaar;
-        private string[] gegevensDitJaar;
+        private List<Personen[]> personenDitJaar;
         private string[] dinerOntbijtDitJaar;
         private string fileName;
 
@@ -51,15 +51,15 @@ namespace HotelReserveringSysteem
                 bezettingDitJaar = value;
             }
         }
-        public string[] GegevensDitJaar
+        public List<Personen[]> PersonenDitJaar
         {
             get
             {
-                return gegevensDitJaar;
+                return personenDitJaar;
             }
             set
             {
-                gegevensDitJaar = value;
+                personenDitJaar = value;
             }
         }
         public string[] DinerOntbijtDitJaar
@@ -124,11 +124,13 @@ namespace HotelReserveringSysteem
                     for (int j = 0; j < PersonenPerKamer; j++)
                     {
                         //persoonsgegevens
-                        tempString += "naam|adres|woonplaats|leeftijd|geslacht&";
+                        tempString += "naam|adres|woonplaats|0|geslacht&";
                     }
 
-                    tempString = tempString.Remove(tempString.Length - 1, 1) + ");";
+                    tempString = tempString.Remove(tempString.Length - 1, 1) + ")";
                 }
+
+                tempString += ";";
 
                 for (int i = 1; i <= (DateTime.Now.Year % 4 == 0 ? 366 : 365); i++)
                 {
@@ -156,8 +158,40 @@ namespace HotelReserveringSysteem
 
             BezettingDitJaar = text.Split(';')[0].Split(',');
             AantalPersonenDitJaar = text.Split(';')[1].Split('(');
+            PersonenDitJaar = new List<Personen[]>();
 
-            for (int i = 0; i < AantalPersonenDitJaar.Count(); i++)
+            foreach (string personen in text.Split(';')[1].Split(')'))
+            {
+                if (personen.IndexOf('(') >= 0 && personen.IndexOf('&') >= 0)
+                {
+                    personen.Substring(personen.IndexOf('('), personen.LastIndexOf('&'));
+                    Personen[] tempPersonen = new Personen[personen.Split('&').Length];
+
+                    for (int i = 0; i < tempPersonen.Length; i++)
+                    {
+                        tempPersonen[i] = new Personen();
+
+                        if (personen.Split('|')[0].Contains(' '))
+                        {
+                            tempPersonen[i].Voornaam = personen.Split('|')[0].Split(' ')[0];
+                            tempPersonen[i].Achternaam = personen.Split('|')[0].Split(' ')[1];
+                        }
+                        else
+                        {
+                            tempPersonen[i].Voornaam = "voornaam";
+                            tempPersonen[i].Achternaam = "achternaam";
+                        }
+                        tempPersonen[i].Adres = personen.Split('|')[1];
+                        tempPersonen[i].Woonplaats = personen.Split('|')[2];
+                        tempPersonen[i].Leeftijd = int.Parse(personen.Split('|')[3]);
+                        tempPersonen[i].Geslacht = personen.Split('|')[4];
+                    }
+
+                    PersonenDitJaar.Add(tempPersonen);
+                }
+            }
+
+            for (int i = 0; i < AantalPersonenDitJaar.Count() - 1; i++)
             {
                 AantalPersonenDitJaar[i] = AantalPersonenDitJaar[i].Substring(AantalPersonenDitJaar[i].Length - 1);
             }
@@ -165,9 +199,13 @@ namespace HotelReserveringSysteem
             Debug.WriteLine("Data opgehaald voor: " + KamerNR);
         }
 
-        public async void SetBezetting(int dag)
+        public async void SetBezetting(int dag, List<Personen> personen)
         {
             BezettingDitJaar[dag - 1] = "bezet";
+            for (int i = 0; i < personen.Count(); i++)
+            {
+                PersonenDitJaar[dag - 1] = personen.ToArray();//TODO: dit werkt nog niet... de personen lijst klopt wel maar wordt niet overgezet naar de personenditjaar lijst
+            }
 
             StorageFolder appFolder = ApplicationData.Current.LocalFolder;
 
@@ -178,6 +216,24 @@ namespace HotelReserveringSysteem
             string text = await FileIO.ReadTextAsync(kamerBestand);
 
             string tempString = string.Join(",", BezettingDitJaar);
+
+            string tempStringPersonen = "";
+
+            foreach (Personen[] pers in PersonenDitJaar)
+            {
+                tempStringPersonen += pers.Length.ToString() + "(";
+
+                foreach (Personen per in pers)
+                {
+                    tempStringPersonen += per.Voornaam + " " + per.Achternaam + "|";
+                    tempStringPersonen += per.Adres + "|";
+                    tempStringPersonen += per.Woonplaats + "|";
+                    tempStringPersonen += per.Leeftijd.ToString() + "|";
+                    tempStringPersonen += per.Geslacht + "&";
+                }
+
+                tempStringPersonen += ")";
+            }
 
             await FileIO.WriteTextAsync(kamerBestand, tempString + ";" + text.Split(';')[1] + ";" + text.Split(';')[2]);
         }

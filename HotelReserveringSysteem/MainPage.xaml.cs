@@ -47,7 +47,14 @@ namespace HotelReserveringSysteem
 
         private void buttonBookRoom_Click(object sender, RoutedEventArgs e)
         {
-            kamers[0].SetBezetting(5);
+            kamers[0].SetBezetting(5, new List<Personen>() { new Personen() {
+                Voornaam = "Henk",
+                Achternaam = "Henksen",
+                Leeftijd = 30,
+                Adres = "Daarachterergenslaan 1",
+                Woonplaats = "Plaats",
+                Geslacht = "Man"
+            } });
         }
 
         private void textBoxDayNumber_TextChanged(object sender, TextChangedEventArgs e)
@@ -72,9 +79,17 @@ namespace HotelReserveringSysteem
 
         private void listViewBezetting_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            textBoxReserveringInfo.Text = "Kamer nummer: " + kamers[listViewBezetting.SelectedIndex].KamerNR + "\n" +
-                "Aantal personen: " + /*kamers[listViewBezetting.SelectedIndex].AantalPersonenDitJaar[dayNumber - 1] +*/ "/" + kamers[listViewBezetting.SelectedIndex].PersonenPerKamer + "\n" +
-                "";
+            if (listViewBezetting.SelectedIndex >= 0)
+            {
+                textBoxReserveringInfo.Text = "Kamer nummer: " + kamers[listViewBezetting.SelectedIndex].KamerNR + "\n" +
+                    "Aantal personen: " + kamers[listViewBezetting.SelectedIndex].AantalPersonenDitJaar[dayNumber - 1] + "/" + kamers[listViewBezetting.SelectedIndex].PersonenPerKamer + "\n" +
+                    "Gegevens personen: ";
+
+                foreach (Personen persoon in kamers[listViewBezetting.SelectedIndex].PersonenDitJaar.ElementAt(dayNumber - 1))
+                {
+                    textBoxReserveringInfo.Text += persoon.ToString();
+                }
+            }
         }
     }
 }
